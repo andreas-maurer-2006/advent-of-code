@@ -1,7 +1,6 @@
 const fs = require("fs")
 const resource = "../../resource/";
 
-
 fs.readFile(resource+"input-day6.txt", "utf8", (error, input) => {
 	if (error)
 		throw error;
