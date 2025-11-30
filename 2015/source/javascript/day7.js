@@ -6,14 +6,14 @@ fs.readFile(resource+"input-day7.txt", "utf8", (error, input) => {
 		throw error;
 	console.log(day7p1(input));
 	/*console.log(day7p1(
-		"123 -> x\n"+
-		"456 -> y\n"+
 		"x AND y -> d\n"+
 		"x OR y -> e\n"+
 		"x LSHIFT 2 -> f\n"+
 		"y RSHIFT 2 -> g\n"+
 		"NOT x -> h\n"+
-		"NOT y -> i\n"
+		"NOT y -> i\n"+
+		"123 -> x\n"+
+		"456 -> y\n"
 	));*/
 	console.log(day7p2(input));
 });
@@ -23,69 +23,73 @@ function day7p1(input) {
 	const state = new Map();
 
 	for (let i = 0; i < commands.length-1; ++i) {
-		day7p1_command(state, commands[i]);
+		const [left, identifier] = commands[i].split(" -> ");
+		state[identifier] = left.split(" ");
 	}
 
-	/*console.log(state['d']);
-	console.log(state['e']);
-	console.log(state['f']);
-	console.log(state['g']);
-	console.log(state['h']);
-	console.log(state['i']);
-	console.log(state['x']);
-	console.log(state['y']);*/
+	return day7p1_determine(state, "a");
 
-	return state['a'];
+	console.log(day7p1_determine(state, 'd'));
+	console.log(day7p1_determine(state, 'e'));
+	console.log(day7p1_determine(state, 'f'));
+	console.log(day7p1_determine(state, 'g'));
+	console.log(day7p1_determine(state, 'h'));
+	console.log(day7p1_determine(state, 'i'));
+	console.log(day7p1_determine(state, 'x'));
+	console.log(day7p1_determine(state, 'y'));
 }
 
 function day7p2(input) {
 	
 }
 
-function day7p1_command(state, command) {
-	const [left, identifier] = command.split(" -> ");
+function day7p1_determine(state, command) {
 	let lhs, op, rhs;
 
-	switch (left.split(" ").length) {
+	console.log(command);
+
+	if (!isNaN(command)) {
+		console.log(Number(command));
+		return Number(command);
+	}
+	switch (state[command].length) {
 	case 1:
-		state[identifier] = !isNaN(left) ? Number(left) : (state[left] ?? 0);
+	console.log("1");
+		[lhs] = // it has something to do with this
+		return day7p1_determine(state, state[command]);
 		break;
 	case 2:
-		[op, rhs] = left.split(" ");
-		rhs = !isNaN(rhs) ? Number(rhs) : (state[rhs] ?? 0);
-		state[identifier] = (~rhs) & 0xFFFF;
+	console.log("2");
+		[op, rhs] = state[command];
+		return (~day7p1_determine(state, rhs)) & 0xFFFF;
 		break;
 	case 3:
-		[lhs, op, rhs] = left.split(" ");
-		if (isNaN(lhs))
-			lhs = state[lhs] ?? 0;
-		else
-			lhs = Number(lhs)
-		if (isNaN(rhs))
-			rhs = state[rhs] ?? 0;
-		else
-			rhs = Number(rhs);
+	console.log("3");
+		[lhs, op, rhs] = state[command];
 		switch (op) {
 		case "AND":
-			state[identifier] = (lhs & rhs) & 0xFFFF;
-			break;
+			return (
+				day7p1_determine(state, lhs)
+				& day7p1_determine(state, rhs)
+			) & 0xFFFF;
 		case "OR":
-			state[identifier] = (lhs | rhs) & 0xFFFF;
-			break;
+			return (
+				day7p1_determine(state, lhs)
+				| day7p1_determine(state, rhs)
+			) & 0xFFFF;
 		case "LSHIFT":
-			state[identifier] = (lhs << rhs) & 0xFFFF;
-			break;
+			return (
+				day7p1_determine(state, lhs)
+				<< day7p1_determine(state, rhs)
+			) & 0xFFFF;
 		case "RSHIFT":
-			state[identifier] = (lhs >> rhs) & 0xFFFF;
-			break;
+			return (
+				day7p1_determine(state, lhs)
+				>> day7p1_determine(state, rhs)
+			) & 0xFFFF;
+		default:
+			throw new Error("error: unreachable code reached");
 		}
-		console.log(
-			"ident: "+identifier+
-			"\nlhs: "+lhs+
-			"\nop: "+op+
-			"\nrhs: "+rhs+
-			"\nstate: "+state[identifier]+
-			"\n\n");
-		break;
-	}
+	default:
+		throw new Error("error: unreachable code reached"); }
 }
